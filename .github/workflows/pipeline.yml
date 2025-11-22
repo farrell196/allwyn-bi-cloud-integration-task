@@ -39,4 +39,9 @@ jobs:
       - name: Generate transformed output file (mock)
         run: |
           echo "order_id,customer_id,order_date,amount" > transformed_output.csv
+          echo "1,101,2024-01-10,120" >> transformed_output.csv
+
+      - name: Upload transformed output to Prod S3 bucket
+        run: |
+          aws s3 cp transformed_output.csv s3://allwyn-prod-bucket-farrell/transformed_output.csv
 
