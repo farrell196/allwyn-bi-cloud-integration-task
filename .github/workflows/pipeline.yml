@@ -1,1 +1,42 @@
+name: BI Cloud Integration Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  data_pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload dataset to Dev S3 bucket
+        run: |
+          aws s3 cp dev/customer_orders.csv s3://allwyn-dev-bucket-farrell/customer_orders.csv
+
+      - name: Run Lint Checks
+        run: |
+          bash scripts/lint.sh
+
+      - name: Run Redshift Transformation
+        run: |
+          aws redshift-data execute-statement \
+            --cluster-identifier ${{ secrets.REDSHIFT_CLUSTER }} \
+            --database dev \
+            --db-user ${{ secrets.REDSHIFT_USER }} \
+            --sql "$(cat scripts/transform.sql)"
+
+      - name: Generate transformed output file (mock)
+        run: |
+          echo "order_id,customer_id,order_date,amount" > transformed_ou
 
