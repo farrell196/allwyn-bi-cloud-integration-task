@@ -38,5 +38,5 @@ jobs:
 
       - name: Generate transformed output file (mock)
         run: |
-          echo "order_id,customer_id,order_date,amount" > transformed_ou
+          echo "order_id,customer_id,order_date,amount" > transformed_output.csv
 
